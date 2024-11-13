@@ -1,30 +1,21 @@
-# Use an official Maven image as the builder
-FROM maven:3.8.5-openjdk-17 AS build
+# Use the official OpenJDK 17 slim image
+FROM openjdk:17-jdk-slim
 
-# Set the working directory in the container
+# Install Maven
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
 WORKDIR /app
 
-# Copy the pom.xml and download dependencies
+# Copy the pom.xml and install dependencies
+COPY pom.xml /app/
+RUN mvn dependency:go-offline
 
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy the rest of the application files and build the application
+# Copy the source code
 COPY src /app/src
-RUN mvn package -DskipTests
 
-# Use an official OpenJDK image to run the application
-FROM openjdk:17-jdk-alpine
-
-# Use an official OpenJDK image to run the application
-FROM openjdk:17-jdk-alpine
-
-# Copy the built application from the builder
-COPY --from=build /app/target/studentManage-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose the port on which the app runs (usually 8080 for Spring Boot)
+# Expose port 8080
 EXPOSE 8081
 
-# Run the app
-ENTRYPOINT ["java", "-jar", "app.jar"]
-
+# Run the application with Maven
+CMD ["mvn", "spring-boot:run"]

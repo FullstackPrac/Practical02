@@ -1,6 +1,8 @@
 package com.example.studentManage.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.studentManage.model.Student;  // Corrected import
@@ -61,5 +63,26 @@ public class StudentServiceImpl implements StudentService {
         studentRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found with id: " + id));
         // Delete student
         studentRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Student> getByYearOfEnrolment(String year) {
+        return studentRepository.findByYearOfEnrolment(year);
+    }
+
+    public String getDepartmentByStudentId(Long id) {
+        return studentRepository.findDepartmentById(id);
+    }
+
+    @Override
+    public ResponseEntity<String> deleteStudentsByYear(String year) {
+    List<Student> students = studentRepository.findByYearOfEnrolment(year);
+    
+    if (students.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No students found with year of enrolment: " + year);
+    }
+    
+    studentRepository.deleteAll(students);
+    return ResponseEntity.ok("Successfully deleted students with year of enrolment: " + year);
     }
 }
