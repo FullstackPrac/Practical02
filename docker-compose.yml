@@ -9,7 +9,7 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: userpassword
     ports:
-      - "3307:3306"
+      - "3307:3306"  # Only if external MySQL access is needed
     volumes:
       - mysql-data:/var/lib/mysql
 
@@ -17,11 +17,15 @@ services:
     build:
       context: .
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/your_database
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: userpassword
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/your_database
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=userpassword
+      - SPRING_PROFILES_ACTIVE=dev
     ports:
       - "8081:8081"
+    volumes:
+      - ./src:/app/src  # Mount source code directory for live reload
+      - ./target:/app/target  # Optionally mount target directory to avoid full rebuild
     depends_on:
       - mysql
 
